@@ -64,30 +64,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 		Bundle extras = intent.getExtras();
 		if (extras != null)
 		{
-            if (PushPlugin.isInForeground())
-            	PushPlugin.sendExtras(extras);
-            else
-            {
-            	try
-            	{
-            		JSONObject ob = PushPlugin.convertBundleToJson(extras);
-            		String title = "";
-            		try
-            		{
-            			title = ob.getString("title");
-            		}
-            		catch (JSONException eex)
-            		{
-            			title = "Nová zpráva!";
-            		}
-            		createNotification(context, title, ob.getString("message"), 0);
-            	}
-            	catch (JSONException ex)
-            	{
-            		Log.d("JSONParse", "Notification does not contain key! Notice: "+ex.getMessage());
-            	}
-            }
-        }
+            		PushPlugin.sendExtras(extras);
+        	}
 	}
 
 	public static void createNotification(Context context, String title, String message, int count)
