@@ -73,7 +73,15 @@ public class GCMIntentService extends GCMBaseIntentService {
 					if (obj.has("payload"))
 					{
 						JSONObject subobj = obj.getJSONObject("payload").getJSONObject("alert");
-						text = subobj.getString("body");
+						if (subobj.has("alert"))
+						{
+							text = subobj.getString("body");
+						}
+						else
+						{
+							subobj = subobj.getJSONObject("data");
+							text = subobj.getString("message");
+						}
 					}
 					else
 					{
@@ -84,7 +92,8 @@ public class GCMIntentService extends GCMBaseIntentService {
                 }
                 catch (JSONException ex)
                 {
-                    Log.d(TAG, "JSONObject received does not contain needed data (payload.alert.body, nor data.message), ignoring");
+					JSONObject obj = PushPlugin.convertBundleToJson(extras);
+                    Log.d(TAG, "JSONObject received does not contain needed data (payload.alert.body, nor data.message), ignoring. Full message: "+obj.toString());
                 }
             }
         }
