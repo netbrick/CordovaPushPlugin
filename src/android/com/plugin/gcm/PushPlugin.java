@@ -22,7 +22,7 @@ import com.google.android.gcm.GCMRegistrar;
 
 public class PushPlugin extends CordovaPlugin {
 	public static final String TAG = "PushPlugin";
-	
+
 	public static final String REGISTER = "register";
 	public static final String UNREGISTER = "unregister";
 	public static final String STATUSBARNOTIFY = "notifyStatusBar";
@@ -55,7 +55,7 @@ public class PushPlugin extends CordovaPlugin {
 
 			try {
 				JSONObject jo = data.getJSONObject(0);
-				
+
 				gWebView = this.webView;
 				Log.v(TAG, "execute: jo=" + jo.toString());
 
@@ -75,10 +75,10 @@ public class PushPlugin extends CordovaPlugin {
 
 			if ( gCachedExtras != null) {
 				Log.v(TAG, "sending cached extras");
-				sendExtras(gCachedExtras);
+				sendExtras(gCachedExtras, false);
 				gCachedExtras = null;
 			}
-			
+
 		} else if (UNREGISTER.equals(action)) {
 
 			GCMRegistrar.unregister(getApplicationContext());
@@ -91,7 +91,7 @@ public class PushPlugin extends CordovaPlugin {
 			try
 			{
 				JSONObject jo = data.getJSONObject(0);
-				
+
 				String title = jo.getString("title");
 				String msg = jo.getString("message");
 				int count = jo.getInt("count");
@@ -102,7 +102,7 @@ public class PushPlugin extends CordovaPlugin {
 			{
 				//
 			}
-			
+
 			Log.v(TAG, "UNREGISTER");
 			result = true;
 			callbackContext.success();
@@ -123,7 +123,7 @@ public class PushPlugin extends CordovaPlugin {
 		Log.v(TAG, "sendJavascript: " + _d);
 
 		if (gECB != null && gWebView != null) {
-			gWebView.sendJavascript(_d); 
+			gWebView.sendJavascript(_d);
 		}
 	}
 
@@ -131,24 +131,32 @@ public class PushPlugin extends CordovaPlugin {
 	 * Sends the pushbundle extras to the client application.
 	 * If the client application isn't currently active, it is cached for later processing.
 	 */
-	public static void sendExtras(Bundle extras)
+	public static boolean sendExtras(Bundle extras, boolean cacheIfNeeded)
 	{
 		if (extras != null) {
 			if (gECB != null && gWebView != null) {
 				sendJavascript(convertBundleToJson(extras));
+				return true;
 			} else {
-				Log.v(TAG, "sendExtras: caching extras to send at a later time.");
-				gCachedExtras = extras;
+			    if (cacheIfNeeded)
+			    {
+					Log.v(TAG, "sendExtras: caching extras to send at a later time.");
+				    gCachedExtras = extras;
+				    return true;
+			    }
+			    else
+			        return false;
 			}
 		}
+		return false;
 	}
-	
+
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
         gForeground = true;
     }
-	
+
 	@Override
     public void onPause(boolean multitasking) {
         super.onPause(multitasking);
@@ -178,14 +186,14 @@ public class PushPlugin extends CordovaPlugin {
 		{
 			JSONObject json;
 			json = new JSONObject().put("event", "message");
-        
+
 			JSONObject jsondata = new JSONObject();
 			Iterator<String> it = extras.keySet().iterator();
 			while (it.hasNext())
 			{
 				String key = it.next();
-				Object value = extras.get(key);	
-        	
+				Object value = extras.get(key);
+
 				// System data from Android
 				if (key.equals("from") || key.equals("collapse_key"))
 				{
@@ -206,10 +214,10 @@ public class PushPlugin extends CordovaPlugin {
 					{
 						json.put(key, value);
 					}
-        		
+
 					if ( value instanceof String ) {
 					// Try to figure out if the value is another JSON object
-						
+
 						String strValue = (String)value;
 						if (strValue.startsWith("{")) {
 							try {
@@ -241,7 +249,7 @@ public class PushPlugin extends CordovaPlugin {
 				}
 			} // while
 			json.put("payload", jsondata);
-        
+
 			Log.d(TAG, "extrasToJSON: " + json.toString());
 
 			return json;
@@ -249,8 +257,8 @@ public class PushPlugin extends CordovaPlugin {
 		catch( JSONException e)
 		{
 			Log.e(TAG, "extrasToJSON: JSON exception");
-		}        	
-		return null;      	
+		}
+		return null;
     }
 
     public static boolean isInForeground()

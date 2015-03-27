@@ -20,7 +20,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 	public static final int NOTIFICATION_ID = 237;
 	private static final String TAG = "GCMIntentService";
-	
+
 	public GCMIntentService() {
 		super("GCMIntentService");
 	}
@@ -58,14 +58,26 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 	@Override
 	protected void onMessage(Context context, Intent intent) {
-		Log.d(TAG, "onMessage - context: " + context);
+        Log.d(TAG, "onMessage - context: " + context);
 
-		// Extract the payload from the message
-		Bundle extras = intent.getExtras();
-		if (extras != null)
-		{
-            		PushPlugin.sendExtras(extras);
-        	}
+        // Extract the payload from the message
+        Bundle extras = intent.getExtras();
+        if (extras != null)
+        {
+            if (!PushPlugin.sendExtras(extras, false))
+            {
+                try
+                {
+                    JSONObject obj = PushPlugin.convertBundleToJson(extras);
+                    JSONObject subobj = obj.getJSONObject("payload").getJSONObject("alert");
+                    createNotification(context, subobj.getString("body"), subobj.getString("body"), 1);
+                }
+                catch (JSONException ex)
+                {
+                    Log.d(TAG, "JSONObject received does not contain needed data (payload.alert.body), ignoring");
+                }
+            }
+        }
 	}
 
 	public static void createNotification(Context context, String title, String message, int count)
@@ -77,7 +89,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		notificationIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-		
+
 		NotificationCompat.Builder mBuilder =
 			new NotificationCompat.Builder(context)
 				.setDefaults(Notification.DEFAULT_ALL)
@@ -94,26 +106,26 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 		if (count != 0)
 			mBuilder.setNumber(count);
-		
+
 		mNotificationManager.notify((String) appName, NOTIFICATION_ID, mBuilder.build());
 	}
-	
+
 	public static void cancelNotification(Context context)
 	{
 		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.cancel((String)getAppName(context), NOTIFICATION_ID);	
+		mNotificationManager.cancel((String)getAppName(context), NOTIFICATION_ID);
 	}
-	
+
 	private static String getAppName(Context context)
 	{
-		CharSequence appName = 
+		CharSequence appName =
 				context
 					.getPackageManager()
 					.getApplicationLabel(context.getApplicationInfo());
 
 		return (String)appName;
 	}
-	
+
 	@Override
 	public void onError(Context context, String errorId) {
 		Log.e(TAG, "onError - errorId: " + errorId);
