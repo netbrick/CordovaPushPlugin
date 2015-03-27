@@ -69,12 +69,22 @@ public class GCMIntentService extends GCMBaseIntentService {
                 try
                 {
                     JSONObject obj = PushPlugin.convertBundleToJson(extras);
-                    JSONObject subobj = obj.getJSONObject("payload").getJSONObject("alert");
-                    createNotification(context, subobj.getString("body"), subobj.getString("body"), 1);
+					String text = "";
+					if (obj.has("payload"))
+					{
+						JSONObject subobj = obj.getJSONObject("payload").getJSONObject("alert");
+						text = subobj.getString("body");
+					}
+					else
+					{
+						JSONObject subobj = obj.getJSONObject("data");
+						text = subobj.getString("message");
+					}
+                    createNotification(context, text, text, 1);
                 }
                 catch (JSONException ex)
                 {
-                    Log.d(TAG, "JSONObject received does not contain needed data (payload.alert.body), ignoring");
+                    Log.d(TAG, "JSONObject received does not contain needed data (payload.alert.body, nor data.message), ignoring");
                 }
             }
         }
