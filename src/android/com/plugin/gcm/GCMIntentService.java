@@ -70,7 +70,11 @@ public class GCMIntentService extends GCMBaseIntentService {
                 {
                     JSONObject obj = PushPlugin.convertBundleToJson(extras);
 					String text = "";
-					if (obj.has("payload"))
+					if (obj.has("message"))
+					{
+						text = obj.getString("message");
+					}
+					else if (obj.has("payload"))
 					{
 						JSONObject subobj = obj.getJSONObject("payload").getJSONObject("alert");
 						if (subobj.has("alert"))
@@ -83,14 +87,10 @@ public class GCMIntentService extends GCMBaseIntentService {
 							text = subobj.getString("message");
 						}
 					}
-					else if (obj.has("data"))
+					else
 					{
 						JSONObject subobj = obj.getJSONObject("data");
 						text = subobj.getString("message");
-					}
-					else
-					{
-						text = obj.getString("message");
 					}
                     createNotification(context, text, text, 1);
                 }
