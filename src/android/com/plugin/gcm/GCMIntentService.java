@@ -83,10 +83,14 @@ public class GCMIntentService extends GCMBaseIntentService {
 							text = subobj.getString("message");
 						}
 					}
-					else
+					else if (obj.has("data"))
 					{
 						JSONObject subobj = obj.getJSONObject("data");
 						text = subobj.getString("message");
+					}
+					else
+					{
+						text = obj.getString("message");
 					}
                     createNotification(context, text, text, 1);
                 }
