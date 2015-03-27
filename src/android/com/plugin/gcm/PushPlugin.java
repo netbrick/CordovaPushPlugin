@@ -142,7 +142,7 @@ public class PushPlugin extends CordovaPlugin {
 			    {
 					Log.v(TAG, "sendExtras: caching extras to send at a later time.");
 				    gCachedExtras = extras;
-				    return true;
+				    return false;
 			    }
 			    else
 			        return false;

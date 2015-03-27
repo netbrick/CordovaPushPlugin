@@ -64,7 +64,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         Bundle extras = intent.getExtras();
         if (extras != null)
         {
-            if (!PushPlugin.sendExtras(extras, false))
+            if (!PushPlugin.sendExtras(extras, true))
             {
                 try
                 {
