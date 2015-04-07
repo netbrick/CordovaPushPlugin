@@ -77,9 +77,13 @@ public class GCMIntentService extends GCMBaseIntentService {
 					else if (obj.has("payload"))
 					{
 						JSONObject subobj = obj.getJSONObject("payload");
-						if (subobj.has("body"))
+						if (subobj.has("alert"))
 						{
-							text = subobj.getString("body");
+							subobj = subobj.getJSONObject("alert");
+							if (subobj.has("body"))
+							{
+								text = subobj.getString("body");
+							}
 						}
 						else
 						{
