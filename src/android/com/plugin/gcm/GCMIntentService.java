@@ -109,6 +109,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 	public static void createNotification(Context context, String title, String message, int count)
 	{
+		cancelNotification(context);
+
 		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		String appName = getAppName(context);
 
